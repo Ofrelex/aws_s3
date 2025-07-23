@@ -72,3 +72,79 @@ Ensure you can:
 * Use the AWS CLI to perform S3 operations (e.g., `aws s3 ls`, `aws s3 cp`)
 * Explore “static website hosting” with S3
 * Set up “logging and monitoring” with CloudWatch
+
+# Revised Project Outline (with Implementation)
+Here’s how to structure the improved project:
+#
+### 1. Purpose (25/25)
+Clarify your objective, then add how you'll prove it practically.
+> Already well-written. Just briefly add that you will include **live CLI commands, screenshots, and validation results** to demonstrate successful execution.
+#
+### 2. Requirements (Show Execution – 25/25)
+#### a. Create an S3 Bucket (CLI)
+```bash
+aws s3api create-bucket --bucket my-demo-bucket-12345 --region us-east-1
+```
+#### b. **Upload an Object**
+```bash
+aws s3 cp myfile.txt s3://my-demo-bucket-12345/
+```
+#### c. **Enable Versioning**
+```bash
+aws s3api put-bucket-versioning --bucket my-demo-bucket-12345 \
+  --versioning-configuration Status=Enabled
+```
+#### d. **Re-upload the same file (to see versioning in action)**
+```bash
+aws s3 cp myfile.txt s3://my-demo-bucket-12345/
+```
+Then run:
+```bash
+aws s3api list-object-versions --bucket my-demo-bucket-12345
+```
+#### e. **Configure Object Permissions (Make Public)**
+```bash
+aws s3api put-object-acl --bucket my-demo-bucket-12345 --key myfile.txt --acl public-read
+```
+#### f. **Add Lifecycle Policy**
+```json
+{
+  "Rules": [
+    {
+      "ID": "MoveToGlacier",
+      "Status": "Enabled",
+      "Prefix": "",
+      "Transitions": [
+        {
+          "Days": 30,
+          "StorageClass": "GLACIER"
+        }
+      ]
+    }
+  ]
+}
+```
+#
+Then run:
+```bash
+aws s3api put-bucket-lifecycle-configuration \
+  --bucket my-demo-bucket-12345 \
+  --lifecycle-configuration file://lifecycle.json
+```
+### **3. Use Case (25/25)**
+Now include:
+* Why you enabled versioning: “To protect against accidental overwrites”
+* Why lifecycle rules matter: “To optimize storage cost”
+* Why public access: “To host a simple file or allow open access”
+* Back it with screenshots & CLI outputs
+#
+### **4. Performance (25/25)**
+Include final **validation checks**:
+* Run:
+```bash
+aws s3api get-bucket-versioning --bucket my-demo-bucket-12345
+```
+* Check if file is public:
+```bash
+curl https://my-demo-bucket-12345.s3.amazonaws.com/myfile.txt
+```
